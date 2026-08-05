@@ -1,0 +1,8 @@
+{
+  "name": "Remix Remix Remix UNIKORN360 AI Solutions",
+  "description": "Corporate Website, Customer Portal \u0026 Super Admin Command Center for UNIKORN360 Enterprise Intelligence Platform.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
