@@ -15,10 +15,14 @@ import {
   FileText,
   PhoneCall,
   Globe,
-  Check
+  Check,
+  Upload,
+  Image as ImageIcon
 } from 'lucide-react';
 import { COMPANY_INFO } from '../data/companyInfo';
 import { UserProfile } from '../types';
+import { useLanguage } from '../context/LanguageContext';
+import { LogoUploadModal } from './LogoUploadModal';
 
 const LANGUAGES = [
   { code: 'EN', name: 'English', native: 'English' },
@@ -58,19 +62,15 @@ export const Header: React.FC<HeaderProps> = ({
   activeView,
   setActiveView
 }) => {
+  const { language, setLanguage, t } = useLanguage();
+  const [logoModalOpen, setLogoModalOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [solutionsDropdownOpen, setSolutionsDropdownOpen] = useState(false);
   const [customLogo, setCustomLogo] = useState<string | null>(null);
-  const [selectedLang, setSelectedLang] = useState('EN');
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
 
   useEffect(() => {
-    const savedLang = localStorage.getItem('unikorn_lang');
-    if (savedLang) {
-      setSelectedLang(savedLang);
-    }
-
     const savedLogo = localStorage.getItem('unikorn_brand_logo');
     if (savedLogo) {
       setCustomLogo(savedLogo);
@@ -90,13 +90,11 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   const handleSelectLang = (code: string) => {
-    setSelectedLang(code);
-    localStorage.setItem('unikorn_lang', code);
+    setLanguage(code);
     setLangDropdownOpen(false);
-    window.dispatchEvent(new CustomEvent('unikorn_lang_changed', { detail: code }));
   };
 
-  const currentLangObj = LANGUAGES.find(l => l.code === selectedLang) || LANGUAGES[0];
+  const currentLangObj = LANGUAGES.find(l => l.code === language) || LANGUAGES[0];
 
   const isAdmin = currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN';
 
@@ -106,22 +104,30 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center justify-between h-16 sm:h-20">
 
           {/* Brand Logo & Title */}
-          <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => setActiveView('website')}>
-            <div className="shrink-0">
+          <div className="flex items-center space-x-3 group">
+            <div 
+              className="shrink-0 relative cursor-pointer group/logo"
+              onClick={() => setLogoModalOpen(true)}
+              title="Click to Upload / Change Logo"
+            >
               {customLogo ? (
                 <img 
                   src={customLogo} 
                   alt="UNIKORN360 Brand Logo" 
-                  className="w-11 h-11 object-contain rounded bg-[#001F3F] p-0.5 border-2 border-[#D4AF37] shadow-md group-hover:scale-105 transition-transform"
+                  className="w-11 h-11 object-contain rounded bg-[#001F3F] p-0.5 border-2 border-[#D4AF37] shadow-md group-hover/logo:scale-105 transition-transform"
                 />
               ) : (
-                <div className="w-11 h-11 bg-[#D4AF37] rounded flex items-center justify-center font-bold text-[#001F3F] text-xl shadow-md shrink-0 group-hover:scale-105 transition-transform">
+                <div className="w-11 h-11 bg-[#D4AF37] rounded flex items-center justify-center font-bold text-[#001F3F] text-xl shadow-md shrink-0 group-hover/logo:scale-105 transition-transform">
                   U3
                 </div>
               )}
+              {/* Overlay Upload Camera Badge */}
+              <div className="absolute -bottom-1 -right-1 bg-[#001F3F] text-[#D4AF37] p-1 rounded-full border border-[#D4AF37] shadow-sm opacity-90 group-hover/logo:opacity-100 group-hover/logo:scale-110 transition-all">
+                <Upload className="w-2.5 h-2.5" />
+              </div>
             </div>
             
-            <div className="flex flex-col">
+            <div className="flex flex-col cursor-pointer" onClick={() => setActiveView('website')}>
               <div className="flex items-center space-x-2">
                 <span className="font-sans font-bold text-lg sm:text-xl tracking-wider text-white uppercase">
                   UNIKORN<span className="text-[#D4AF37]">360</span>
@@ -234,7 +240,7 @@ export const Header: React.FC<HeaderProps> = ({
                       key={lang.code}
                       onClick={() => handleSelectLang(lang.code)}
                       className={`w-full text-left px-3 py-1.5 hover:bg-white/10 flex items-center justify-between text-xs transition-colors ${
-                        selectedLang === lang.code ? 'text-[#D4AF37] font-bold bg-white/5' : 'text-white/80'
+                        language === lang.code ? 'text-[#D4AF37] font-bold bg-white/5' : 'text-white/80'
                       }`}
                     >
                       <div className="flex items-center space-x-2">
@@ -242,7 +248,7 @@ export const Header: React.FC<HeaderProps> = ({
                         <span>{lang.name}</span>
                         <span className="text-[10px] text-white/50">({lang.native})</span>
                       </div>
-                      {selectedLang === lang.code && <Check className="w-3.5 h-3.5 text-[#D4AF37]" />}
+                      {language === lang.code && <Check className="w-3.5 h-3.5 text-[#D4AF37]" />}
                     </button>
                   ))}
                 </div>
@@ -322,6 +328,17 @@ export const Header: React.FC<HeaderProps> = ({
                         </button>
                       )}
 
+                      <button
+                        onClick={() => {
+                          setLogoModalOpen(true);
+                          setUserMenuOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-white/10 text-white/80 hover:text-[#D4AF37] flex items-center space-x-2"
+                      >
+                        <Upload className="w-4 h-4 text-[#D4AF37]" />
+                        <span>Upload Brand Logo</span>
+                      </button>
+
                       <div className="border-t border-white/10 my-1"></div>
 
                       <button
@@ -373,6 +390,11 @@ export const Header: React.FC<HeaderProps> = ({
             <span>AI Business Intelligence Assessment</span>
           </button>
 
+          <button onClick={() => { setLogoModalOpen(true); setMobileMenuOpen(false); }} className="flex items-center space-x-2 text-[#D4AF37] py-2 font-semibold">
+            <Upload className="w-4 h-4" />
+            <span>Upload Company Logo</span>
+          </button>
+
           <button onClick={() => { onOpenConcierge(); setMobileMenuOpen(false); }} className="flex items-center space-x-2 text-green-400 py-2 font-semibold">
             <Bot className="w-4 h-4" />
             <span>Ask UNIKORN360 AI</span>
@@ -392,11 +414,11 @@ export const Header: React.FC<HeaderProps> = ({
                     setMobileMenuOpen(false);
                   }}
                   className={`px-2 py-1.5 rounded text-xs text-left flex items-center justify-between transition-colors ${
-                    selectedLang === lang.code ? 'bg-[#D4AF37] text-[#001F3F] font-bold' : 'bg-white/5 text-white/80 hover:bg-white/10'
+                    language === lang.code ? 'bg-[#D4AF37] text-[#001F3F] font-bold' : 'bg-white/5 text-white/80 hover:bg-white/10'
                   }`}
                 >
                   <span className="truncate">{lang.name} ({lang.native})</span>
-                  {selectedLang === lang.code && <Check className="w-3 h-3 shrink-0" />}
+                  {language === lang.code && <Check className="w-3 h-3 shrink-0" />}
                 </button>
               ))}
             </div>
@@ -407,6 +429,14 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
       )}
+
+      {/* Brand Logo Upload Modal */}
+      <LogoUploadModal
+        isOpen={logoModalOpen}
+        onClose={() => setLogoModalOpen(false)}
+        currentLogo={customLogo}
+        onLogoUpdated={(newLogo) => setCustomLogo(newLogo)}
+      />
     </nav>
   );
 };
