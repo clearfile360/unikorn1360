@@ -13,10 +13,25 @@ import {
   Bot,
   Brain,
   FileText,
-  PhoneCall
+  PhoneCall,
+  Globe,
+  Check
 } from 'lucide-react';
 import { COMPANY_INFO } from '../data/companyInfo';
 import { UserProfile } from '../types';
+
+const LANGUAGES = [
+  { code: 'EN', name: 'English', native: 'English' },
+  { code: 'HI', name: 'Hindi', native: 'हिन्दी' },
+  { code: 'TA', name: 'Tamil', native: 'தமிழ்' },
+  { code: 'TE', name: 'Telugu', native: 'తెలుగు' },
+  { code: 'KN', name: 'Kannada', native: 'ಕನ್ನಡ' },
+  { code: 'MR', name: 'Marathi', native: 'मराठी' },
+  { code: 'ES', name: 'Spanish', native: 'Español' },
+  { code: 'FR', name: 'French', native: 'Français' },
+  { code: 'DE', name: 'German', native: 'Deutsch' },
+  { code: 'AR', name: 'Arabic', native: 'العربية' },
+];
 
 interface HeaderProps {
   currentUser: UserProfile | null;
@@ -47,8 +62,15 @@ export const Header: React.FC<HeaderProps> = ({
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [solutionsDropdownOpen, setSolutionsDropdownOpen] = useState(false);
   const [customLogo, setCustomLogo] = useState<string | null>(null);
+  const [selectedLang, setSelectedLang] = useState('EN');
+  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
 
   useEffect(() => {
+    const savedLang = localStorage.getItem('unikorn_lang');
+    if (savedLang) {
+      setSelectedLang(savedLang);
+    }
+
     const savedLogo = localStorage.getItem('unikorn_brand_logo');
     if (savedLogo) {
       setCustomLogo(savedLogo);
@@ -66,6 +88,15 @@ export const Header: React.FC<HeaderProps> = ({
       window.removeEventListener('unikorn_logo_updated', handleStorageChange);
     };
   }, []);
+
+  const handleSelectLang = (code: string) => {
+    setSelectedLang(code);
+    localStorage.setItem('unikorn_lang', code);
+    setLangDropdownOpen(false);
+    window.dispatchEvent(new CustomEvent('unikorn_lang_changed', { detail: code }));
+  };
+
+  const currentLangObj = LANGUAGES.find(l => l.code === selectedLang) || LANGUAGES[0];
 
   const isAdmin = currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN';
 
@@ -179,6 +210,44 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="hidden xl:inline text-[11px] text-white/70">Search...</span>
               <kbd className="hidden xl:inline text-[9px] bg-[#001F3F] px-1.5 py-0.5 rounded text-[#D4AF37] border border-[#D4AF37]/30">⌘K</kbd>
             </button>
+
+            {/* Language Switcher Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+                className="flex items-center space-x-1.5 bg-[#002B5B] hover:bg-[#003670] border border-[#D4AF37]/40 hover:border-[#D4AF37] text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-sm"
+                title="Select Language / भाषा चुनें"
+                aria-label="Select Language"
+              >
+                <Globe className="w-4 h-4 text-[#D4AF37] shrink-0" />
+                <span className="text-xs font-bold text-white tracking-wider uppercase">{currentLangObj.code}</span>
+                <ChevronDown className="w-3 h-3 text-[#D4AF37]" />
+              </button>
+
+              {langDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-[#001F3F] border-2 border-[#D4AF37] rounded-xl shadow-2xl py-2 z-50 text-left max-h-72 overflow-y-auto font-sans">
+                  <div className="px-3 py-1.5 border-b border-white/10 mb-1">
+                    <span className="text-[10px] uppercase font-bold text-[#D4AF37] tracking-wider">Select Language</span>
+                  </div>
+                  {LANGUAGES.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => handleSelectLang(lang.code)}
+                      className={`w-full text-left px-3 py-1.5 hover:bg-white/10 flex items-center justify-between text-xs transition-colors ${
+                        selectedLang === lang.code ? 'text-[#D4AF37] font-bold bg-white/5' : 'text-white/80'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-white font-bold">{lang.code}</span>
+                        <span>{lang.name}</span>
+                        <span className="text-[10px] text-white/50">({lang.native})</span>
+                      </div>
+                      {selectedLang === lang.code && <Check className="w-3.5 h-3.5 text-[#D4AF37]" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* Book Demo Button */}
             <button
@@ -309,7 +378,31 @@ export const Header: React.FC<HeaderProps> = ({
             <span>Ask UNIKORN360 AI</span>
           </button>
 
-          <button onClick={() => { onOpenDemoBooking(); setMobileMenuOpen(false); }} className="w-full bg-[#D4AF37] text-[#001F3F] font-bold py-2.5 rounded text-center uppercase text-xs tracking-widest">
+          <div className="pt-2 border-t border-white/10">
+            <div className="text-[10px] text-[#D4AF37] uppercase font-bold tracking-wider mb-2 flex items-center space-x-1.5">
+              <Globe className="w-3.5 h-3.5" />
+              <span>Language / भाषा:</span>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {LANGUAGES.map(lang => (
+                <button
+                  key={lang.code}
+                  onClick={() => {
+                    handleSelectLang(lang.code);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`px-2 py-1.5 rounded text-xs text-left flex items-center justify-between transition-colors ${
+                    selectedLang === lang.code ? 'bg-[#D4AF37] text-[#001F3F] font-bold' : 'bg-white/5 text-white/80 hover:bg-white/10'
+                  }`}
+                >
+                  <span className="truncate">{lang.name} ({lang.native})</span>
+                  {selectedLang === lang.code && <Check className="w-3 h-3 shrink-0" />}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button onClick={() => { onOpenDemoBooking(); setMobileMenuOpen(false); }} className="w-full bg-[#D4AF37] text-[#001F3F] font-bold py-2.5 rounded text-center uppercase text-xs tracking-widest mt-2">
             Book Executive Demo
           </button>
         </div>
