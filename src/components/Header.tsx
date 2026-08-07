@@ -15,14 +15,11 @@ import {
   FileText,
   PhoneCall,
   Globe,
-  Check,
-  Upload,
-  Image as ImageIcon
+  Check
 } from 'lucide-react';
 import { COMPANY_INFO } from '../data/companyInfo';
 import { UserProfile } from '../types';
 import { useLanguage } from '../context/LanguageContext';
-import { LogoUploadModal } from './LogoUploadModal';
 
 const LANGUAGES = [
   { code: 'EN', name: 'English', native: 'English' },
@@ -63,7 +60,6 @@ export const Header: React.FC<HeaderProps> = ({
   setActiveView
 }) => {
   const { language, setLanguage, t } = useLanguage();
-  const [logoModalOpen, setLogoModalOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [solutionsDropdownOpen, setSolutionsDropdownOpen] = useState(false);
@@ -104,30 +100,22 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center justify-between h-16 sm:h-20">
 
           {/* Brand Logo & Title */}
-          <div className="flex items-center space-x-3 group">
-            <div 
-              className="shrink-0 relative cursor-pointer group/logo"
-              onClick={() => setLogoModalOpen(true)}
-              title="Click to Upload / Change Logo"
-            >
+          <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => setActiveView('website')}>
+            <div className="shrink-0">
               {customLogo ? (
                 <img 
                   src={customLogo} 
                   alt="UNIKORN360 Brand Logo" 
-                  className="w-11 h-11 object-contain rounded bg-[#001F3F] p-0.5 border-2 border-[#D4AF37] shadow-md group-hover/logo:scale-105 transition-transform"
+                  className="w-11 h-11 object-contain rounded bg-[#001F3F] p-0.5 border-2 border-[#D4AF37] shadow-md group-hover:scale-105 transition-transform"
                 />
               ) : (
-                <div className="w-11 h-11 bg-[#D4AF37] rounded flex items-center justify-center font-bold text-[#001F3F] text-xl shadow-md shrink-0 group-hover/logo:scale-105 transition-transform">
+                <div className="w-11 h-11 bg-[#D4AF37] rounded flex items-center justify-center font-bold text-[#001F3F] text-xl shadow-md shrink-0 group-hover:scale-105 transition-transform">
                   U3
                 </div>
               )}
-              {/* Overlay Upload Camera Badge */}
-              <div className="absolute -bottom-1 -right-1 bg-[#001F3F] text-[#D4AF37] p-1 rounded-full border border-[#D4AF37] shadow-sm opacity-90 group-hover/logo:opacity-100 group-hover/logo:scale-110 transition-all">
-                <Upload className="w-2.5 h-2.5" />
-              </div>
             </div>
             
-            <div className="flex flex-col cursor-pointer" onClick={() => setActiveView('website')}>
+            <div className="flex flex-col">
               <div className="flex items-center space-x-2">
                 <span className="font-sans font-bold text-lg sm:text-xl tracking-wider text-white uppercase">
                   UNIKORN<span className="text-[#D4AF37]">360</span>
@@ -328,17 +316,6 @@ export const Header: React.FC<HeaderProps> = ({
                         </button>
                       )}
 
-                      <button
-                        onClick={() => {
-                          setLogoModalOpen(true);
-                          setUserMenuOpen(false);
-                        }}
-                        className="w-full text-left px-4 py-2 hover:bg-white/10 text-white/80 hover:text-[#D4AF37] flex items-center space-x-2"
-                      >
-                        <Upload className="w-4 h-4 text-[#D4AF37]" />
-                        <span>Upload Brand Logo</span>
-                      </button>
-
                       <div className="border-t border-white/10 my-1"></div>
 
                       <button
@@ -390,11 +367,6 @@ export const Header: React.FC<HeaderProps> = ({
             <span>AI Business Intelligence Assessment</span>
           </button>
 
-          <button onClick={() => { setLogoModalOpen(true); setMobileMenuOpen(false); }} className="flex items-center space-x-2 text-[#D4AF37] py-2 font-semibold">
-            <Upload className="w-4 h-4" />
-            <span>Upload Company Logo</span>
-          </button>
-
           <button onClick={() => { onOpenConcierge(); setMobileMenuOpen(false); }} className="flex items-center space-x-2 text-green-400 py-2 font-semibold">
             <Bot className="w-4 h-4" />
             <span>Ask UNIKORN360 AI</span>
@@ -429,14 +401,6 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
       )}
-
-      {/* Brand Logo Upload Modal */}
-      <LogoUploadModal
-        isOpen={logoModalOpen}
-        onClose={() => setLogoModalOpen(false)}
-        currentLogo={customLogo}
-        onLogoUpdated={(newLogo) => setCustomLogo(newLogo)}
-      />
     </nav>
   );
 };

@@ -20,10 +20,8 @@ import {
   Settings,
   Brain,
   HelpCircle,
-  Image as ImageIcon,
-  Upload
+  Image as ImageIcon
 } from 'lucide-react';
-import { LogoUploadModal } from './LogoUploadModal';
 import { 
   ResponsiveContainer, 
   AreaChart, 
@@ -86,7 +84,6 @@ export const AdminCommandCenter: React.FC<AdminCommandCenterProps> = ({ currentU
   const [heroSub, setHeroSub] = useState("UNIKORN360 AI Solutions transforms organizations into AI-powered enterprises...");
   const [statsDisclaimer, setStatsDisclaimer] = useState(true);
   const [brandLogo, setBrandLogo] = useState<string | null>(null);
-  const [logoModalOpen, setLogoModalOpen] = useState(false);
 
   useEffect(() => {
     fetchAdminData();
@@ -570,14 +567,6 @@ export const AdminCommandCenter: React.FC<AdminCommandCenterProps> = ({ currentU
                     </p>
                   </div>
                 </div>
-
-                <button
-                  onClick={() => setLogoModalOpen(true)}
-                  className="bg-[#001F3F] text-white border border-[#D4AF37] hover:bg-[#002B5B] font-bold py-2 px-4 rounded-lg shadow text-xs flex items-center space-x-2 shrink-0 transition-all"
-                >
-                  <Upload className="w-4 h-4 text-[#D4AF37]" />
-                  <span>Upload / Change Logo</span>
-                </button>
               </div>
             </div>
 
@@ -691,14 +680,6 @@ export const AdminCommandCenter: React.FC<AdminCommandCenterProps> = ({ currentU
             </div>
           </div>
         )}
-
-        {/* Brand Logo Upload Modal */}
-        <LogoUploadModal
-          isOpen={logoModalOpen}
-          onClose={() => setLogoModalOpen(false)}
-          currentLogo={brandLogo}
-          onLogoUpdated={(newLogo) => setBrandLogo(newLogo)}
-        />
 
       </div>
     </div>
